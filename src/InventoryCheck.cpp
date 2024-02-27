@@ -19,7 +19,12 @@ void checkOnlineForm(Player& pl) {
         return true;
     });
     for (auto& [uuid, name] : onlineList) {
-        fm.appendButton(name, [uuid](Player& pl) { return checkPlayerForm(pl, uuid); });
+        if (uuid != pl.getUuid()) {
+            fm.appendButton(name, [uuid](Player& pl) { return checkPlayerForm(pl, uuid); });
+        }
+    }
+    if (onlineList.size() == 1) {
+        return pl.sendMessage(tr("checkOnline.empty"));
     }
     fm.sendTo(pl, [](Player& pl, int index) {
         if (index == -1) {
@@ -60,7 +65,12 @@ void checkAllForm(Player& pl) {
     auto fm      = ll::form::SimpleForm(tr("form.checkList.title"), tr("form.checkList.content"));
     auto allList = generateUuidMap();
     for (auto& [uuid, name] : allList) {
-        fm.appendButton(name, [uuid](Player& pl) { return checkPlayerForm(pl, uuid); });
+        if (uuid != pl.getUuid()) {
+            fm.appendButton(name, [uuid](Player& pl) { return checkPlayerForm(pl, uuid); });
+        }
+    }
+    if (allList.size() == 1) {
+        return pl.sendMessage(tr("checkAll.empty"));
     }
     fm.sendTo(pl, [](Player& pl, int index) {
         if (index == -1) {

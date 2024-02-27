@@ -49,4 +49,6 @@ std::string defaultLanguage_zh_CN = R"(
     form.deleteFailed.title=删除失败
     form.deleteFailed.content=玩家 %s 在线！无法删除玩家全部数据！\n\n如需删除全部玩家数据，请先将该玩家踢出游戏再操作！
     form.deleteFailed.returnCheck=返回操作界面
+    checkOnline.empty=全服就你一个人在线，还在这查在线玩家呢？\n还不快去招人？
+    checkAll.empty=整个存档就你一个人玩过，还在这玩查包呢？\n还不快去招人？
 )";
