@@ -10,7 +10,7 @@
 #include <stdexcept>
 ll::Logger logger(PLUGIN_NAME);
 
-namespace change_this {
+namespace InventoryCheck {
 
 namespace {
 
@@ -71,13 +71,13 @@ auto getSelfPluginInstance() -> ll::plugin::NativePlugin& {
     return *selfPluginInstance;
 }
 
-} // namespace change_this
+} // namespace InventoryCheck
 
 extern "C" {
 _declspec(dllexport) auto ll_plugin_disable(ll::plugin::NativePlugin& self) -> bool {
-    return change_this::disable(self);
+    return InventoryCheck::disable(self);
 }
-_declspec(dllexport) auto ll_plugin_enable(ll::plugin::NativePlugin& self) -> bool { return change_this::enable(self); }
-_declspec(dllexport) auto ll_plugin_load(ll::plugin::NativePlugin& self) -> bool { return change_this::load(self); }
-_declspec(dllexport) auto ll_plugin_unload(ll::plugin::NativePlugin& self) -> bool { return change_this::unload(self); }
+_declspec(dllexport) auto ll_plugin_enable(ll::plugin::NativePlugin& self) -> bool { return InventoryCheck::enable(self); }
+_declspec(dllexport) auto ll_plugin_load(ll::plugin::NativePlugin& self) -> bool { return InventoryCheck::load(self); }
+_declspec(dllexport) auto ll_plugin_unload(ll::plugin::NativePlugin& self) -> bool { return InventoryCheck::unload(self); }
 }

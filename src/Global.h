@@ -1,7 +1,6 @@
 #pragma once
-#include <ll/api/Logger.h>
-// #include <include_all.h>
+#include <include_all.h>
 
-#define PLUGIN_NAME "plugin"
+#define PLUGIN_NAME "InventoryCheck"
 
 extern ll::Logger logger;
