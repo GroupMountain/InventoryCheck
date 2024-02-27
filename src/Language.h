@@ -51,4 +51,6 @@ std::string defaultLanguage_zh_CN = R"(
     form.deleteFailed.returnCheck=返回操作界面
     checkOnline.empty=全服就你一个人在线，还在这查在线玩家呢？\n还不快去招人？
     checkAll.empty=整个存档就你一个人玩过，还在这玩查包呢？\n还不快去招人？
+    resumeInventory.success=已成功复原你的背包！
+    resumeInventory.failed=无法复原你的背包，没有找到你的背包数据！
 )";

@@ -1,11 +1,60 @@
 #include "Global.h"
 
+bool saveInventory(Player& player) {
+    auto&       pl   = static_cast<GMLIB_Player&>(player);
+    auto        uuid = pl.getUuid();
+    std::string path = "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat";
+    if (!std::filesystem::exists(path)) {
+        auto          nbt = pl.getNbt()->toBinaryNbt();
+        std::ofstream newFile(path, std::ios::out | std::ios::binary);
+        if (newFile.is_open()) {
+            newFile.write(nbt.c_str(), nbt.size());
+            newFile.close();
+
+            return true;
+        }
+    }
+    return false;
+}
+
+bool resumeInventory(Player& player) {
+    auto&       pl   = static_cast<GMLIB_Player&>(player);
+    auto        uuid = pl.getUuid();
+    std::string path = "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat";
+    if (std::filesystem::exists(path)) {
+        std::ifstream dataFile(path, std::ios::binary);
+        if (dataFile.is_open()) {
+            dataFile.seekg(0, std::ios::end);
+            std::streampos fileSize = dataFile.tellg();
+            dataFile.seekg(0, std::ios::beg);
+            std::vector<char> buffer(fileSize);
+            dataFile.read(buffer.data(), fileSize);
+            std::string_view binaryData(buffer.data(), fileSize);
+            dataFile.close();
+            std::filesystem::remove(path);
+            auto nbt = CompoundTag::fromBinaryNbt(binaryData);
+            if (nbt) {
+                GMLIB_Player::setPlayerNbtTags(uuid, *nbt, {"Offhand", "Inventory", "Armor", "EnderChestInventory"});
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
 void mainForm(Player& pl) {
     auto fm = ll::form::SimpleForm(tr("form.main.title"), tr("form.main.content"));
     fm.appendButton(tr("form.main.checkOnline"), [](Player& pl) { return checkOnlineForm(pl); });
     fm.appendButton(tr("form.main.checkAll"), [](Player& pl) { return checkAllForm(pl); });
     fm.appendButton(tr("form.main.searchPlayer"), [](Player& pl) { return searchPlayerForm(pl); });
-    fm.appendButton(tr("form.main.resumeInventory"), [](Player& pl) { return; });
+    fm.appendButton(tr("form.main.resumeInventory"), [](Player& pl) {
+        auto res = resumeInventory(pl);
+        if (res) {
+            return pl.sendMessage(tr("resumeInventory.success"));
+        }
+        return pl.sendMessage(tr("resumeInventory.failed"));
+    });
     fm.sendTo(pl);
 }
 
@@ -154,6 +203,7 @@ void checkPlayerForm(Player& pl, mce::UUID uuid) {
     std::string name = getNameFormUuid(uuid);
     auto        fm   = ll::form::SimpleForm(tr("form.checkPlayer.title"), tr("form.checkPlayer.content", {name}));
     fm.appendButton(tr("form.checkPlayer.copyInventory"), [uuid, name](Player& pl) {
+        saveInventory(pl);
         auto nbt = GMLIB_Player::getPlayerNbt(uuid);
         if (!nbt) {
             return pl.sendMessage(tr("checkPlayer.copyInventory.failed", {name}));

@@ -15,6 +15,12 @@ void initPlugin() {
     Language->updateOrCreateLanguage("zh_CN", defaultLanguage_zh_CN);
     Language->loadAllLanguages();
     Language->chooseLanguage(languageCode);
+    if (!std::filesystem::exists("./plugins/InventoryCheck/data/")) {
+        std::filesystem::create_directories("./plugins/InventoryCheck/data/");
+    }
+    if (!std::filesystem::exists("./plugins/InventoryCheck/save/")) {
+        std::filesystem::create_directories("./plugins/InventoryCheck/save/");
+    }
 }
 
 std::string tr(std::string key, std::vector<std::string> data) { return Language->translate(key, data); }
