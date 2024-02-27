@@ -2,7 +2,53 @@
 #include "Global.h"
 
 std::string defaultLanguage_en_US = R"(
-    
+    form.main.title=Check Player Inventory
+    form.main.content=Please select a query mode.
+    form.main.checkOnline=Query online players
+    form.main.checkAll=Query all players
+    form.main.searchPlayer=Search player
+    form.main.resumeInventory=Resume yor inventory
+    form.checkList.title=Player List
+    form.checkList.content=Please select the player you want to check.
+    form.searchPlayer.title=Search Player
+    form.searchPlayer.description=Please enter the player's name to search.
+    form.searchPlayer.input=Player's name
+    form.searchPlayer.inputName=Please enter name information.
+    form.searchForm.searchMode=Search mode
+    form.searchPlayer.fuzzySearch=Fuzzy Search
+    form.searchPlayer.preciseSearch=Precise Search
+    form.notFound.title=No match found
+    form.notFound.content=No match for %s was found.
+    form.notFound.returnSearch=Return to the search menu
+    form.returnMainForm=Return to the main menu
+    form.checkPlayer.title=Check Player Inventory
+    form.checkPlayer.content=You are looking for player %s's backpack.\nPlease select the mode of operation.
+    form.checkPlayer.copyInventory=Copy player inventory
+    form.checkPlayer.writeInventory=Write player inventory
+    form.checkPlayer.deleteData=Delete player data
+    form.invalidInput.title=Invalid Input
+    form.invalidInput.content=The player name entered cannot be empty!
+    form.invalidInput.returnSearch=Search again
+    command.error.console=This command can only be executed by the player
+    command.inventorycheck.desc=Check player inventory.
+    checkPlayer.copyInventory.success=Successfully copied player %s's inventory to yours!
+    checkPlayer.copyInventory.failed=It is not possible to copy player %s's backpack to yours! \nPlayer %s doesn't have any data!
+    form.confirmWrite.title=Confirm Action
+    form.confirmWrite.content=Are you sure you want to cover player %s's backpack with your backpack? \n\nAttention! \nThis operation is irreversible!
+    form.confirmAction=Confirm
+    form.cancelAction=Cancel
+    checkPlayer.writeInventory.success=Successfully overwrote player %s's backpack!
+    checkPlayer.writeInventory.failed=Cannot cover player %s's backpack! nPlayer %s doesn't have any data!
+    form.confirmDelete.title=Confirm Delete Data
+    form.confirmDelete.content=Are you sure you want to delete all of player %s's data? \nThis contains all the player's data in the save! \nIt's not just a backpack! \n\nAttention! nThis operation is irreversible! \nPlease proceed with caution
+    checkPlayer.deleteNbt.success=Successfully deleted all of player %s's data!
+    form.deleteFailed.title=Deletion failed
+    form.deleteFailed.content=Players %s online! You can't delete all of your players' data! \n\nIf you want to delete all player data, please kick the player out of the game before you do it!
+    form.deleteFailed.returnCheck=Return to the check menu
+    checkOnline.empty=You are online alone on the whole server, and you are still checking online players here? \nWhy don't you go and recruit people?
+    checkAll.empty=You've played the entire archive alone, and you're still playing here to check the bag? \nWhy don't you go and recruit people?
+    resumeInventory.success=Your backpack has been resumed!
+    resumeInventory.failed=Unable to resume your backpack, no data was found on your backpack!
 )";
 
 std::string defaultLanguage_zh_CN = R"(

@@ -6,7 +6,7 @@ GMLIB::Files::JsonConfig*     Config   = nullptr;
 GMLIB::Files::I18n::LangI18n* Language = nullptr;
 nlohmann::json                mPlayerDataCache;
 
-std::optional<std::string> readFile(std::string path) {
+std::optional<nlohmann::json> readFile(std::string path) {
     if (std::filesystem::exists(path)) {
         return GMLIB::Files::JsonFile::readFromFile(path);
     }
@@ -18,7 +18,7 @@ void initPlayerDataCache() {
     auto data        = readFile("./plugins/InventoryCheck/data/PlayerDataCache.json");
     if (data.has_value()) {
         try {
-            mPlayerDataCache = nlohmann::json::parse(data.value());
+            mPlayerDataCache = data.value();
         } catch (...) {}
     }
 }

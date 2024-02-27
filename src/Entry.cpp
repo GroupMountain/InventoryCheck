@@ -15,6 +15,9 @@ auto disable(ll::plugin::NativePlugin& /*self*/) -> bool { return true; }
 auto enable(ll::plugin::NativePlugin& /*self*/) -> bool {
     RegisterCommand();
     listenEvent();
+    logger.info("InventoryCheck Loaded!");
+    logger.info("Author: GroupMountain");
+    logger.info("Repository: https://github.com/GroupMountain/InventoryCheck/");
     return true;
 }
 
