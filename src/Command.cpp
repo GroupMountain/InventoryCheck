@@ -1,4 +1,3 @@
-#include "Forms.h"
 #include "Global.h"
 
 void RegisterCommand() {
