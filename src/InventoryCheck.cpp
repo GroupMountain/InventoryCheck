@@ -10,7 +10,6 @@ bool saveInventory(Player& player) {
         if (newFile.is_open()) {
             newFile.write(nbt.c_str(), nbt.size());
             newFile.close();
-
             return true;
         }
     }
@@ -89,7 +88,7 @@ std::string getNameFormUuid(mce::UUID& uuid) {
         name = player->getRealName();
     } else {
         auto strUuid   = uuid.asString();
-        auto cachename = GMLIB::Server::UserCache::getNameByUuid(strUuid);
+        auto cachename = getNameFromUuid(strUuid);
         if (cachename.has_value()) {
             name = cachename.value();
         } else {

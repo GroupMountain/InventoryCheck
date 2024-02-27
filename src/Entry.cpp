@@ -14,13 +14,14 @@ auto disable(ll::plugin::NativePlugin& /*self*/) -> bool { return true; }
 
 auto enable(ll::plugin::NativePlugin& /*self*/) -> bool {
     RegisterCommand();
+    listenEvent();
     return true;
 }
 
 auto load(ll::plugin::NativePlugin& self) -> bool {
     selfPluginInstance = std::make_unique<std::reference_wrapper<ll::plugin::NativePlugin>>(self);
-    GMLIB::Server::UserCache::enableUserCache();
     initPlugin();
+    initPlayerDataCache();
     return true;
 }
 

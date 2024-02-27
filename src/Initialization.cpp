@@ -4,6 +4,29 @@
 
 GMLIB::Files::JsonConfig*     Config   = nullptr;
 GMLIB::Files::I18n::LangI18n* Language = nullptr;
+nlohmann::json                mPlayerDataCache;
+
+std::optional<std::string> readFile(std::string path) {
+    if (std::filesystem::exists(path)) {
+        return GMLIB::Files::JsonFile::readFromFile(path);
+    }
+    return {};
+}
+
+void initPlayerDataCache() {
+    mPlayerDataCache = nlohmann::json::object();
+    auto data        = readFile("./plugins/InventoryCheck/data/PlayerDataCache.json");
+    if (data.has_value()) {
+        try {
+            mPlayerDataCache = nlohmann::json::parse(data.value());
+        } catch (...) {}
+    }
+}
+
+void saveCacheData() {
+    std::string path = "./plugins/InventoryCheck/data/PlayerDataCache.json";
+    GMLIB::Files::JsonFile::writeFile(path, mPlayerDataCache);
+}
 
 void initPlugin() {
     Config = new GMLIB::Files::JsonConfig("./plugins/InventoryCheck/config/config.json", defaultConfig);
@@ -24,3 +47,19 @@ void initPlugin() {
 }
 
 std::string tr(std::string key, std::vector<std::string> data) { return Language->translate(key, data); }
+
+void listenEvent() {
+    auto& eventBus = ll::event::EventBus::getInstance();
+    eventBus.emplaceListener<ll::event::player::PlayerConnectEvent>([](ll::event::player::PlayerConnectEvent& ev) {
+        auto& pl                                  = ev.self();
+        mPlayerDataCache[pl.getUuid().asString()] = pl.getRealName();
+        saveCacheData();
+    });
+}
+
+std::optional<std::string> getNameFromUuid(std::string uuid) {
+    if (mPlayerDataCache.contains(uuid)) {
+        return mPlayerDataCache[uuid].get<std::string>();
+    }
+    return {};
+}
