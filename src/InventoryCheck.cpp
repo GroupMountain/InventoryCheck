@@ -274,8 +274,7 @@ void confirmDeleteForm(Player& pl, mce::UUID uuid, std::string name) {
             if (player) {
                 return deleteFailedForm(pl, uuid, name);
             }
-            auto serverId = GMLIB_Player::getServerIdFromUuid(uuid);
-            GMLIB_Player::deletePlayerNbt(serverId);
+            GMLIB_Player::deletePlayerNbt(uuid);
             return pl.sendMessage(tr("checkPlayer.deleteNbt.success", {name}));
         }
         return checkPlayerForm(pl, uuid);
