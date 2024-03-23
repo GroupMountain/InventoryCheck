@@ -101,8 +101,7 @@ std::string getNameFormUuid(mce::UUID& uuid) {
 std::unordered_map<mce::UUID, std::string> generateUuidMap() {
     auto                                       allUuids = GMLIB_Player::getAllUuids();
     std::unordered_map<mce::UUID, std::string> allList;
-    for (auto& strUuid : allUuids) {
-        auto uuid     = mce::UUID::fromString(strUuid);
+    for (auto& uuid : allUuids) {
         auto name     = getNameFormUuid(uuid);
         allList[uuid] = name;
     }
