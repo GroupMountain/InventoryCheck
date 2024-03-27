@@ -24,6 +24,14 @@ auto enable(ll::plugin::NativePlugin& /*self*/) -> bool {
 auto load(ll::plugin::NativePlugin& self) -> bool {
     selfPluginInstance = std::make_unique<std::reference_wrapper<ll::plugin::NativePlugin>>(self);
     initPlugin();
+    if (GMLIB::Version::getProtocolVersion() != TARGET_PROTOCOL) {
+        logger.error(tr("error.protocolMismatch.info"));
+        logger.error(
+            tr("error.protocolMismatch.version",
+               {std::to_string(TARGET_PROTOCOL), std::to_string(GMLIB::Version::getProtocolVersion())})
+        );
+        return false;
+    }
     initPlayerDataCache();
     return true;
 }

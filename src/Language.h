@@ -49,6 +49,8 @@ std::string defaultLanguage_en_US = R"(
     checkAll.empty=You've played the entire archive alone, and you're still playing here to check the bag? \nWhy don't you go and recruit people?
     resumeInventory.success=Your backpack has been resumed!
     resumeInventory.failed=Unable to resume your backpack, no data was found on your backpack!
+    error.protocolMismatch.info=You are running on an unsupport protocol version! This may result in crash!
+    error.protocolMismatch.version=Support protocol %1$s, current protocol %2$s.
 )";
 
 std::string defaultLanguage_zh_CN = R"(
@@ -99,4 +101,6 @@ std::string defaultLanguage_zh_CN = R"(
     checkAll.empty=整个存档就你一个人玩过，还在这玩查包呢？\n还不快去招人？
     resumeInventory.success=已成功复原你的背包！
     resumeInventory.failed=无法复原你的背包，没有找到你的背包数据！
+    error.protocolMismatch.info=此插件正在不兼容的版本协议上运行！这可能造成服务器崩溃！
+    error.protocolMismatch.version=此插件支持版本协议 %1$s，服务器版本协议 %2$s。
 )";
