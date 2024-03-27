@@ -1,7 +1,7 @@
 {
     "format_version": 2,
     "tooth": "github.com/GroupMountain/InventoryCheck",
-    "version": "0.9.3",
+    "version": "0.10.0",
     "info": {
         "name": "InventoryCheck",
         "description": "Check Player's Inventory",
@@ -14,9 +14,9 @@
             "gmlib"
         ]
     },
-    "asset_url": "https://github.com/GroupMountain/InventoryCheck/releases/download/v0.9.3/InventoryCheck-windows-x64.zip",
+    "asset_url": "https://github.com/GroupMountain/InventoryCheck/releases/download/v0.10.0/InventoryCheck-windows-x64.zip",
     "dependencies": {
-        "github.com/GroupMountain/GMLIB": ">=0.9.8"
+        "github.com/GroupMountain/GMLIB": ">=0.10.x"
     },
     "files": {
         "place": [
