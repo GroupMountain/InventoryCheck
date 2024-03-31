@@ -74,7 +74,7 @@ void checkOnlineForm(Player& pl) {
     if (onlineList.size() == 1) {
         return pl.sendMessage(tr("checkOnline.empty"));
     }
-    fm.sendTo(pl, [](Player& pl, int index) {
+    fm.sendTo(pl, [](Player& pl, int index, ll::form::FormCancelReason) {
         if (index == -1) {
             return mainForm(pl);
         }
@@ -119,7 +119,7 @@ void checkAllForm(Player& pl) {
     if (allList.size() == 1) {
         return pl.sendMessage(tr("checkAll.empty"));
     }
-    fm.sendTo(pl, [](Player& pl, int index) {
+    fm.sendTo(pl, [](Player& pl, int index, ll::form::FormCancelReason) {
         if (index == -1) {
             return mainForm(pl);
         }
@@ -136,15 +136,15 @@ void searchPlayerForm(Player& pl) {
         {tr("form.searchPlayer.fuzzySearch"), tr("form.searchPlayer.preciseSearch")},
         0
     );
-    fm.sendTo(pl, [](Player& pl, const ll::form::CustomFormResult& result) {
-        if (result.empty()) {
+    fm.sendTo(pl, [](Player& pl, const ll::form::CustomFormResult& result, ll::form::FormCancelReason) {
+        if (!result.has_value()) {
             return mainForm(pl);
         }
         std::string inputName;
-        if (std::holds_alternative<std::string>(result.at("name"))) {
-            inputName = std::get<std::string>(result.at("name"));
+        if (std::holds_alternative<std::string>(result->at("name"))) {
+            inputName = std::get<std::string>(result->at("name"));
         }
-        auto searchMode = std::get<std::string>(result.at("mode"));
+        auto searchMode = std::get<std::string>(result->at("mode"));
         if (inputName.empty()) {
             return invalidInputForm(pl);
         }
@@ -175,7 +175,7 @@ void searchResultForm(Player& pl, std::unordered_map<mce::UUID, std::string> res
     for (auto& [uuid, name] : resultList) {
         fm.appendButton(name, [&uuid](Player& pl) { checkPlayerForm(pl, uuid); });
     }
-    fm.sendTo(pl, [](Player& pl, int index) {
+    fm.sendTo(pl, [](Player& pl, int index, ll::form::FormCancelReason) {
         if (index == -1) {
             return searchPlayerForm(pl);
         }
@@ -189,8 +189,8 @@ void searchNotFoundForm(Player& pl, std::string& name) {
         tr("form.notFound.returnSearch"),
         tr("form.returnMainForm")
     );
-    fm.sendTo(pl, [](Player& pl, ll::form::ModalForm::SelectedButton result) {
-        if (result == ll::form::ModalForm::SelectedButton::Upper) {
+    fm.sendTo(pl, [](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
+        if (result == ll::form::ModalFormSelectedButton::Upper) {
             return searchPlayerForm(pl);
         }
         return mainForm(pl);
@@ -216,7 +216,7 @@ void checkPlayerForm(Player& pl, mce::UUID uuid) {
     fm.appendButton(tr("form.checkPlayer.deleteData"), [uuid, name](Player& pl) {
         return confirmDeleteForm(pl, uuid, name);
     });
-    fm.sendTo(pl, [](Player& pl, int index) {
+    fm.sendTo(pl, [](Player& pl, int index, ll::form::FormCancelReason) {
         if (index == -1) {
             return mainForm(pl);
         }
@@ -230,8 +230,8 @@ void invalidInputForm(Player& pl) {
         tr("form.invalidInput.returnSearch"),
         tr("form.returnMainForm")
     );
-    fm.sendTo(pl, [](Player& pl, ll::form::ModalForm::SelectedButton result) {
-        if (result == ll::form::ModalForm::SelectedButton::Upper) {
+    fm.sendTo(pl, [](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
+        if (result == ll::form::ModalFormSelectedButton::Upper) {
             return searchPlayerForm(pl);
         }
         return mainForm(pl);
@@ -245,8 +245,8 @@ void confirmWriteForm(Player& pl, mce::UUID uuid, std::string name) {
         tr("form.confirmAction"),
         tr("form.cancelAction")
     );
-    fm.sendTo(pl, [uuid, name](Player& pl, ll::form::ModalForm::SelectedButton result) {
-        if (result == ll::form::ModalForm::SelectedButton::Upper) {
+    fm.sendTo(pl, [uuid, name](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
+        if (result == ll::form::ModalFormSelectedButton::Upper) {
             auto& self      = static_cast<GMLIB_Player&>(pl);
             auto  nbt       = self.getNbt();
             auto  targetNbt = GMLIB_Player::getPlayerNbt(uuid);
@@ -267,8 +267,8 @@ void confirmDeleteForm(Player& pl, mce::UUID uuid, std::string name) {
         tr("form.confirmAction"),
         tr("form.cancelAction")
     );
-    fm.sendTo(pl, [uuid, name](Player& pl, ll::form::ModalForm::SelectedButton result) {
-        if (result == ll::form::ModalForm::SelectedButton::Upper) {
+    fm.sendTo(pl, [uuid, name](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
+        if (result == ll::form::ModalFormSelectedButton::Upper) {
             auto player = GMLIB_Level::getLevel()->getPlayer(uuid);
             if (player) {
                 return deleteFailedForm(pl, uuid, name);
@@ -287,8 +287,8 @@ void deleteFailedForm(Player& pl, mce::UUID uuid, std::string name) {
         tr("form.deleteFailed.returnCheck"),
         tr("form.returnMainForm")
     );
-    fm.sendTo(pl, [uuid](Player& pl, ll::form::ModalForm::SelectedButton result) {
-        if (result == ll::form::ModalForm::SelectedButton::Upper) {
+    fm.sendTo(pl, [uuid](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
+        if (result == ll::form::ModalFormSelectedButton::Upper) {
             return checkPlayerForm(pl, uuid);
         }
         return mainForm(pl);
