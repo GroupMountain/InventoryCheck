@@ -136,7 +136,7 @@ void searchPlayerForm(Player& pl) {
         {tr("form.searchPlayer.fuzzySearch"), tr("form.searchPlayer.preciseSearch")},
         0
     );
-    fm.sendTo(pl, [](Player& pl, const ll::form::CustomFormResult& result, ll::form::FormCancelReason) {
+    fm.sendTo(pl, [](Player& pl, ll::form::CustomFormResult const& result, ll::form::FormCancelReason) {
         if (!result.has_value()) {
             return mainForm(pl);
         }
@@ -173,7 +173,7 @@ void searchPlayerForm(Player& pl) {
 void searchResultForm(Player& pl, std::unordered_map<mce::UUID, std::string> resultList) {
     auto fm = ll::form::SimpleForm(tr("form.checkList.title"), tr("form.checkList.content"));
     for (auto& [uuid, name] : resultList) {
-        fm.appendButton(name, [&uuid](Player& pl) { checkPlayerForm(pl, uuid); });
+        fm.appendButton(name, [uuid](Player& pl) { checkPlayerForm(pl, uuid); });
     }
     fm.sendTo(pl, [](Player& pl, int index, ll::form::FormCancelReason) {
         if (index == -1) {
