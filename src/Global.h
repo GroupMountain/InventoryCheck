@@ -2,7 +2,7 @@
 #include <include_all.h>
 
 #define PLUGIN_NAME     "InventoryCheck"
-#define TARGET_PROTOCOL 662
+#define TARGET_PROTOCOL 671
 
 extern ll::Logger logger;
 
