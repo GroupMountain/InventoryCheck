@@ -248,12 +248,11 @@ void confirmDeleteForm(Player& pl, mce::UUID const& uuid, std::string const& nam
     );
     fm.sendTo(pl, [uuid, name](Player& pl, ll::form::ModalFormResult result, ll::form::FormCancelReason) {
         if (result == ll::form::ModalFormSelectedButton::Upper) {
-            auto player = GMLIB_Level::getLevel()->getPlayer(uuid);
-            if (player) {
+            if (auto player = GMLIB_Level::getLevel()->getPlayer(uuid)) {
                 return deleteFailedForm(pl, uuid, name);
             }
-            GMLIB_Player::deletePlayerNbt(uuid);
-            return pl.sendMessage(tr("checkPlayer.deleteNbt.success", {name}));
+            GMLIB_Player::deletePlayer(uuid);
+            return pl.sendMessage(tr("checkPlayer.deletePlayer.success", {name}));
         }
         return checkPlayerForm(pl, uuid);
     });
