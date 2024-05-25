@@ -1,29 +1,25 @@
 #include "Entry.h"
 #include "Global.h"
+#include "Language.h"
 
 ll::Logger logger(PLUGIN_NAME);
 
 namespace InventoryCheck {
 
-namespace {
-
-std::unique_ptr<std::reference_wrapper<ll::plugin::NativePlugin>>
-    selfPluginInstance; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
-
-auto disable(ll::plugin::NativePlugin& /*self*/) -> bool { return true; }
-
-auto enable(ll::plugin::NativePlugin& /*self*/) -> bool {
-    RegisterCommand();
-    listenEvent();
-    logger.info("InventoryCheck Loaded!");
-    logger.info("Author: GroupMountain");
-    logger.info("Repository: https://github.com/GroupMountain/InventoryCheck");
-    return true;
+std::unique_ptr<Entry>& Entry::getInstance() {
+    static std::unique_ptr<Entry> instance;
+    return instance;
 }
 
-auto load(ll::plugin::NativePlugin& self) -> bool {
-    selfPluginInstance = std::make_unique<std::reference_wrapper<ll::plugin::NativePlugin>>(self);
-    initPlugin();
+bool Entry::load() {
+    mConfig.emplace();
+    if (!ll::config::loadConfig(*mConfig, getSelf().getConfigDir() / u8"config.json")) {
+        ll::config::saveConfig(*mConfig, getSelf().getConfigDir() / u8"config.json");
+    }
+    mI18n.emplace(getSelf().getLangDir(), mConfig->language);
+    mI18n->updateOrCreateLanguage("en_US", en_US);
+    mI18n->updateOrCreateLanguage("zh_CN", zh_CN);
+    mI18n->loadAllLanguages();
     if (GMLIB::Version::getProtocolVersion() != TARGET_PROTOCOL) {
         logger.error(tr("error.protocolMismatch.info"));
         logger.error(
@@ -32,35 +28,35 @@ auto load(ll::plugin::NativePlugin& self) -> bool {
         );
         return false;
     }
-    initPlayerDataCache();
     return true;
 }
 
-auto unload(ll::plugin::NativePlugin& self) -> bool {
-    selfPluginInstance.reset();
+bool Entry::enable() {
+    RegisterCommand();
+    logger.info("InventoryCheck Loaded!");
+    logger.info("Author: GroupMountain");
+    logger.info("Repository: https://github.com/GroupMountain/InventoryCheck");
     return true;
 }
 
-} // namespace
-
-auto getSelfPluginInstance() -> ll::plugin::NativePlugin& {
-    if (!selfPluginInstance) {
-        throw std::runtime_error("selfPluginInstance is null");
-    }
-    return *selfPluginInstance;
+bool Entry::disable() {
+    // Code for disabling the plugin goes here.
+    return true;
 }
+
+bool Entry::unload() {
+    getInstance().reset();
+    return true;
+}
+
+Config& Entry::getConfig() { return mConfig.value(); }
+
+LangI18n& Entry::getI18n() { return mI18n.value(); }
 
 } // namespace InventoryCheck
 
-extern "C" {
-_declspec(dllexport) auto ll_plugin_disable(ll::plugin::NativePlugin& self) -> bool {
-    return InventoryCheck::disable(self);
-}
-_declspec(dllexport) auto ll_plugin_enable(ll::plugin::NativePlugin& self) -> bool {
-    return InventoryCheck::enable(self);
-}
-_declspec(dllexport) auto ll_plugin_load(ll::plugin::NativePlugin& self) -> bool { return InventoryCheck::load(self); }
-_declspec(dllexport) auto ll_plugin_unload(ll::plugin::NativePlugin& self) -> bool {
-    return InventoryCheck::unload(self);
-}
+LL_REGISTER_PLUGIN(InventoryCheck::Entry, InventoryCheck::Entry::getInstance());
+
+std::string tr(std::string const& key, std::vector<std::string> const& data) {
+    return InventoryCheck::Entry::getInstance()->getI18n().get(key, data);
 }

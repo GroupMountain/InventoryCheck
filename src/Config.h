@@ -1,6 +1,8 @@
 #pragma once
 #include "Global.h"
 
-std::string defaultConfig = R"({
-    "language": "en_US"
-})";
+struct Config {
+    int version = 1;
+
+    std::string language = "en_US";
+};

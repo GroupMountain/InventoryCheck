@@ -1,7 +1,7 @@
 #pragma once
-#include "Global.h"
+#include <iostream>
 
-std::string defaultLanguage_en_US = R"(
+std::string en_US = R"(
     form.main.title=Check Player Inventory
     form.main.content=Please select a query mode.
     form.main.checkOnline=Query online players
@@ -53,7 +53,7 @@ std::string defaultLanguage_en_US = R"(
     error.protocolMismatch.version=Support protocol %1$s, current protocol %2$s.
 )";
 
-std::string defaultLanguage_zh_CN = R"(
+std::string zh_CN = R"(
     form.main.title=查询玩家背包
     form.main.content=请选择查询模式
     form.main.checkOnline=查询在线玩家

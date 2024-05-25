@@ -1,18 +1,13 @@
 #include "Global.h"
 
 bool saveInventory(Player& player) {
-    auto&       pl   = static_cast<GMLIB_Player&>(player);
-    auto        uuid = pl.getUuid();
-    std::string path = "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat";
-    if (!std::filesystem::exists(path)) {
-        auto          nbt = pl.getNbt()->toBinaryNbt();
-        std::ofstream newFile(path, std::ios::out | std::ios::binary);
-        if (newFile.is_open()) {
-            newFile.write(nbt.c_str(), nbt.size());
-            newFile.close();
-            return true;
-        }
-    }
+    auto& pl   = static_cast<GMLIB_Player&>(player);
+    auto  uuid = pl.getUuid();
+    ll::file_utils::writeFile(
+        "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat",
+        pl.getNbt()->toBinaryNbt(),
+        true
+    );
     return false;
 }
 
@@ -20,22 +15,11 @@ bool resumeInventory(Player& player) {
     auto&       pl   = static_cast<GMLIB_Player&>(player);
     auto        uuid = pl.getUuid();
     std::string path = "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat";
-    if (std::filesystem::exists(path)) {
-        std::ifstream dataFile(path, std::ios::binary);
-        if (dataFile.is_open()) {
-            dataFile.seekg(0, std::ios::end);
-            std::streampos fileSize = dataFile.tellg();
-            dataFile.seekg(0, std::ios::beg);
-            std::vector<char> buffer(fileSize);
-            dataFile.read(buffer.data(), fileSize);
-            std::string_view binaryData(buffer.data(), fileSize);
-            dataFile.close();
-            std::filesystem::remove(path);
-            auto nbt = CompoundTag::fromBinaryNbt(binaryData);
-            if (nbt) {
-                GMLIB_Player::setPlayerNbtTags(uuid, *nbt, {"Offhand", "Inventory", "Armor", "EnderChestInventory"});
-                return true;
-            }
+    if (auto binaryData = ll::file_utils::readFile(path, true)) {
+        std::filesystem::remove(path);
+        if (auto nbt = CompoundTag::fromBinaryNbt(binaryData.value())) {
+            GMLIB_Player::setPlayerNbtTags(uuid, *nbt, {"Offhand", "Inventory", "Armor", "EnderChestInventory"});
+            return true;
         }
     }
     return false;
@@ -81,19 +65,14 @@ void checkOnlineForm(Player& pl) {
     });
 }
 
-std::string getNameFormUuid(mce::UUID& uuid) {
+std::string getNameFormUuid(mce::UUID const& uuid) {
     auto        player = GMLIB_Level::getLevel()->getPlayer(uuid);
     std::string name;
     if (player) {
         name = player->getRealName();
     } else {
-        auto strUuid   = uuid.asString();
-        auto cachename = getNameFromUuid(strUuid);
-        if (cachename.has_value()) {
-            name = cachename.value();
-        } else {
-            name = strUuid;
-        }
+        auto cache = GMLIB::UserCache::getNameByUuid(uuid);
+        name       = cache ? cache.value() : uuid.asString();
     }
     return name;
 }
@@ -170,7 +149,7 @@ void searchPlayerForm(Player& pl) {
     });
 }
 
-void searchResultForm(Player& pl, std::unordered_map<mce::UUID, std::string> resultList) {
+void searchResultForm(Player& pl, std::unordered_map<mce::UUID, std::string> const& resultList) {
     auto fm = ll::form::SimpleForm(tr("form.checkList.title"), tr("form.checkList.content"));
     for (auto& [uuid, name] : resultList) {
         fm.appendButton(name, [uuid](Player& pl) { checkPlayerForm(pl, uuid); });
@@ -182,7 +161,7 @@ void searchResultForm(Player& pl, std::unordered_map<mce::UUID, std::string> res
     });
 }
 
-void searchNotFoundForm(Player& pl, std::string& name) {
+void searchNotFoundForm(Player& pl, std::string const& name) {
     auto fm = ll::form::ModalForm(
         tr("form.notFound.title"),
         tr("form.notFound.content", {name}),
@@ -197,7 +176,7 @@ void searchNotFoundForm(Player& pl, std::string& name) {
     });
 }
 
-void checkPlayerForm(Player& pl, mce::UUID uuid) {
+void checkPlayerForm(Player& pl, mce::UUID const& uuid) {
     std::string name = getNameFormUuid(uuid);
     auto        fm   = ll::form::SimpleForm(tr("form.checkPlayer.title"), tr("form.checkPlayer.content", {name}));
     fm.appendButton(tr("form.checkPlayer.copyInventory"), [uuid, name](Player& pl) {
@@ -238,7 +217,7 @@ void invalidInputForm(Player& pl) {
     });
 }
 
-void confirmWriteForm(Player& pl, mce::UUID uuid, std::string name) {
+void confirmWriteForm(Player& pl, mce::UUID const& uuid, std::string const& name) {
     auto fm = ll::form::ModalForm(
         tr("form.confirmWrite.title"),
         tr("form.confirmWrite.content", {name}),
@@ -260,7 +239,7 @@ void confirmWriteForm(Player& pl, mce::UUID uuid, std::string name) {
     });
 }
 
-void confirmDeleteForm(Player& pl, mce::UUID uuid, std::string name) {
+void confirmDeleteForm(Player& pl, mce::UUID const& uuid, std::string const& name) {
     auto fm = ll::form::ModalForm(
         tr("form.confirmDelete.title"),
         tr("form.confirmDelete.content", {name}),
@@ -280,7 +259,7 @@ void confirmDeleteForm(Player& pl, mce::UUID uuid, std::string name) {
     });
 }
 
-void deleteFailedForm(Player& pl, mce::UUID uuid, std::string name) {
+void deleteFailedForm(Player& pl, mce::UUID const& uuid, std::string const& name) {
     auto fm = ll::form::ModalForm(
         tr("form.deleteFailed.title"),
         tr("form.deleteFailed.content", {name}),
