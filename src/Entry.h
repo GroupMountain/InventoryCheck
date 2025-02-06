@@ -11,9 +11,9 @@ using namespace GMLIB::Files::I18n;
 class Entry {
 
 public:
-    static std::unique_ptr<Entry>& getInstance();
+    static Entry& getInstance();
 
-    Entry(ll::mod::NativeMod& self) : mSelf(self) {}
+    Entry() : mSelf(*ll::mod::NativeMod::current()) {}
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 
@@ -25,18 +25,18 @@ public:
 
     /// @return True if the mod is disabled successfully.
     bool disable();
-
+/*
     /// @return True if the mod is unloaded successfully.
     bool unload();
-
+*/
     Config& getConfig();
 
     LangI18n& getI18n();
 
 private:
-    ll::mod::NativeMod& mSelf;
-    std::optional<Config>     mConfig;
-    std::optional<LangI18n>   mI18n;
+    ll::mod::NativeMod&     mSelf;
+    std::optional<Config>   mConfig;
+    std::optional<LangI18n> mI18n;
 };
 
 } // namespace InventoryCheck

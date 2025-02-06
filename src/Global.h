@@ -5,9 +5,7 @@
 #include <include_all.h>
 
 #define MOD_NAME     "InventoryCheck"
-#define TARGET_PROTOCOL 686
-
-extern ll::Logger logger;
+#define TARGET_PROTOCOL 766
 
 extern std::string tr(std::string const& key, std::vector<std::string> const& data = {});
 
