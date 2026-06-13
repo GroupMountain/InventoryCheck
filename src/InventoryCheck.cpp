@@ -1,4 +1,23 @@
 #include "Global.h"
+#include "Entry.h"
+
+#include <filesystem>
+#include <unordered_map>
+
+#include "mc/world/level/Level.h"
+#include "mc/world/level/storage/DBStorage.h"
+#include "mc/world/actor/player/PlayerListEntry.h"
+
+#include "ll/api/service/Bedrock.h"
+#include "ll/api/io/FileUtils.h"
+
+#include "ll/api/form/ModalForm.h"
+#include "ll/api/form/SimpleForm.h"
+#include "ll/api/form/CustomForm.h"
+
+#include "gmlib/mc/world/actor/OfflinePlayer.h"
+
+#include <ll/api/service/PlayerInfo.h>
 
 bool saveInventory(Player& player) {
     auto& pl   = static_cast<GMLIB_Player&>(player);

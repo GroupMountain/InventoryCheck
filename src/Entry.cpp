@@ -2,6 +2,17 @@
 #include "Global.h"
 #include "Language.h"
 
+#include "ll/api/Config.h"
+#include "ll/api/Versions.h"
+#include "ll/api/mod/RegisterHelper.h"
+
+#include "gmlib/gm/i18n/LangI18n.h"
+#include "gmlib/gm/i18n/JsonI18n.h"
+
+#include "gmlib/gm/data/UserCache.h"
+#include "ll/api/service/Bedrock.h"
+#include "ll/api/service/PlayerInfo.h"
+
 ll::Logger logger(MOD_NAME);
 
 namespace InventoryCheck {

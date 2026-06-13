@@ -1,5 +1,13 @@
 #include "Global.h"
 
+#include "mc/server/commands/CommandRegistry.h"
+#include "mc/server/commands/CommandOutput.h"
+
+#include "ll/api/command/CommandHandle.h"
+#include "ll/api/service/Bedrock.h"
+
+#include "gmlib/mc/world/actor/Actor.h"
+
 void RegisterCommand() {
     auto& cmd = ll::command::CommandRegistrar::getInstance().getOrCreateCommand(
         "inventorycheck",
