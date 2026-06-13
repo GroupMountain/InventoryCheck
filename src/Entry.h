@@ -5,18 +5,19 @@
 #include "Global.h"
 #include "gmlib/gm/i18n/LangI18n.h"
 
+#include "gmlib/gm/data/UserCache.h"
 #include <memory>
 
 namespace InventoryCheck {
 
-using namespace GMLIB::Files::I18n;
+using namespace gmlib::i18n;
 
 class Entry {
 
 public:
-    static std::unique_ptr<Entry>& getInstance();
+    static Entry& getInstance();
 
-    Entry(ll::mod::NativeMod& self) : mSelf(self) {}
+    Entry() : mSelf((*ll::mod::NativeMod::current())) {}
 
     [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 
@@ -30,11 +31,13 @@ public:
     bool disable();
 
     /// @return True if the mod is unloaded successfully.
-    bool unload();
 
     Config& getConfig();
 
     LangI18n& getI18n();
+
+    std::vector<gmlib::UserCache::UserCacheEntry> userCache;
+
 
 private:
     ll::mod::NativeMod& mSelf;
