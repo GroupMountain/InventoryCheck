@@ -15,10 +15,16 @@
 #include "ll/api/form/SimpleForm.h"
 #include "ll/api/form/CustomForm.h"
 
-#include "gmlib/gm/data/UserCache.h"
 #include "gmlib/mc/world/actor/OfflinePlayer.h"
 
+#include <ll/api/service/PlayerInfo.h>
 
+/**
+ * @brief the keys of the playr nbt that would be copied or written
+ */
+static constexpr const char* InvKey[] = {
+    "Armor","Offhand","Inventory","EnderChestInventory"
+};
 void saveInventory(Player& player) {
     auto& pl   = static_cast<gmlib::GMPlayer&>(player);
     auto  uuid = pl.getUuid();
@@ -28,35 +34,30 @@ void saveInventory(Player& player) {
         true
     );
 }
+
+/**
+ * @brief set the playerNBT easily and validly
+ */
 bool validSetNbt(mce::UUID uuid, const std::unique_ptr<CompoundTag>& nbt) {
-    try {
-        Player*   player = ll::service::getLevel()->getPlayer(uuid);
-        if (player && nbt) {
-            auto& pl=static_cast<gmlib::GMPlayer&>(*player);
-            pl.setNbt(*nbt);
-            pl.refreshInventory();
-            return true;
-        } else if (nbt) {auto db = ll::service::getDBStorage();
-            if (db && db->hasKey("player_" + uuid.asString(), DBHelpers::Category::Player)) {
-                std::unique_ptr<CompoundTag> playerTag =
-                    db->getCompoundTag("player_" + uuid.asString(), DBHelpers::Category::Player);
-                if (playerTag) {
-                    std::string serverId = playerTag->at("ServerId");
-                    if (!serverId.empty()) {
-                        auto player_offline = gmlib::OfflinePlayer(uuid,serverId);
-                        player_offline.setNbt(*nbt);
-                        return true;
-                    }
-                }
-            }
+    if (!nbt) return false;
 
-        }
-        return false;
+    if (auto* p = ll::service::getLevel()->getPlayer(uuid)) {
+        auto& pl = static_cast<gmlib::GMPlayer&>(*p);
+        pl.setNbt(*nbt);
+        pl.refreshInventory();
+        return true;
     }
-    catch (...) {
+
+    auto db = ll::service::getDBStorage();
+    if (!db) return false;
+
+    auto tag = db->getCompoundTag("player_" + uuid.asString(), DBHelpers::Category::Player);
+
+    if (!tag || !tag->contains("ServerId"))
         return false;
 
-    }
+    gmlib::OfflinePlayer(uuid, tag->at("ServerId")).setNbt(*nbt);
+    return true;
 }
 
 bool resumeInventory(Player& player) {
@@ -67,15 +68,10 @@ bool resumeInventory(Player& player) {
         std::filesystem::remove(path);
         if (auto nbt = CompoundTag::fromBinaryNbt(binaryData.value())) {
             auto playerNbt=pl.getNbt();
-
-            playerNbt->mTags["Armor"] =nbt->at("Armor");
-            playerNbt->mTags["EnderChestInventory"] = nbt->at("EnderChestInventory");
-            playerNbt->mTags["Offhand"] = nbt->at("Offhand");
-            playerNbt->mTags["Inventory"] = nbt->at("Inventory");
+            for (auto key : InvKey)
+                playerNbt->mTags[key] = nbt->at(key);
             pl.setNbt(*playerNbt);
             pl.refreshInventory();
-
-
             return true;
         }
     }
@@ -88,10 +84,9 @@ void mainForm(Player& pl) {
     fm.appendButton(tr("form.main.checkAll"), [](Player& pl) { return checkAllForm(pl); });
     fm.appendButton(tr("form.main.searchPlayer"), [](Player& pl) { return searchPlayerForm(pl); });
     fm.appendButton(tr("form.main.resumeInventory"), [](Player& pl) {
-        if (auto res = resumeInventory(pl)) {
-            return pl.sendMessage(tr("resumeInventory.success"));
-        }
-        return pl.sendMessage(tr("resumeInventory.failed"));
+        pl.sendMessage(resumeInventory(pl)
+            ? tr("resumeInventory.success")
+            : tr("resumeInventory.failed"));
     });
     fm.sendTo(pl);
 }
@@ -105,7 +100,6 @@ void checkOnlineForm(Player& pl) {
         }
         return true;
     });
-
     for (auto& [uuid, name] : onlineList) {
         if (uuid != pl.getUuid()) {
             fm.appendButton(name, [uuid](Player& pl) { return checkPlayerForm(pl, uuid); });
@@ -120,49 +114,33 @@ void checkOnlineForm(Player& pl) {
         }
     });
 }
+
 std::string getNameFormUuid(mce::UUID const& uuid) {
     auto        player = ll::service::getLevel()->getPlayer(uuid);
     std::string name;
     if (player) {
         name = player->getRealName();
     } else {
-        // 获取 UserCache 实例
-        auto userCache = gmlib::UserCache::getInstance();
-        if (!userCache) {
-            return uuid.asString(); // UserCache 未初始化或不可用
-        }
-
-        // 查询用户信息
-        auto entry = userCache->from(uuid);
-
-
-        if (!entry) {
-            return uuid.asString(); // 未找到对应 UUID 的用户
-        }
-        name = entry->mName;
+        auto cache = ll::service::PlayerInfo::getInstance().fromUuid(uuid);
+        name       = cache ? cache->name : uuid.asString();
     }
     return name;
 }
 
 std::unordered_map<mce::UUID, std::string> generateUuidMap() {
-    auto userCache = gmlib::UserCache::getInstance();
-    if (!userCache) {
-        // 处理 UserCache 未初始化的情况
-    }
-
-    std::vector<mce::UUID> allUuids;
-    for (const auto& entry : userCache->entries()) {
-        allUuids.push_back(entry.mUuid);
-    }
-    for (const auto& player : ll::service::getLevel()->getPlayerList()) {
-        allUuids.push_back(player.first);
-    }
-    std::unordered_map<mce::UUID, std::string> allList;
-    for (auto& uuid : allUuids) {
-        auto name     = getNameFormUuid(uuid);
-        allList[uuid] = name;
-    }
-    return std::move(allList);
+        std::vector<mce::UUID> allUuids;
+        for (const auto& entry : ll::service::PlayerInfo::getInstance().entries()) {
+            allUuids.push_back(entry.uuid);
+        }
+        for (const auto& player : ll::service::getLevel()->getPlayerList()) {
+            allUuids.push_back(player.first);
+        }
+        std::unordered_map<mce::UUID, std::string> allList;
+        for (auto& uuid : allUuids) {
+            auto name     = getNameFormUuid(uuid);
+            allList[uuid] = name;
+        }
+        return std::move(allList);
 }
 
 void checkAllForm(Player& pl) {
@@ -253,57 +231,40 @@ void searchNotFoundForm(Player& pl, std::string const& name) {
         return mainForm(pl);
     });
 }
+/**
+ * @brief get the playerNBT conveninetly
+ */
 std::unique_ptr<CompoundTag> getNBTptr(mce::UUID uuid) {
-
-    if (auto player = ll::service::getLevel()->getPlayer(uuid)) {
-        auto& pl=static_cast<gmlib::GMPlayer&>(*player);
-        return pl.getNbt();
-    }
-    else {
-        auto db   = ll::service::getDBStorage();
-        if (db && db->hasKey("player_" + uuid.asString(), DBHelpers::Category::Player)) {
-            std::unique_ptr<CompoundTag> playerTag =
-                db->getCompoundTag("player_" + uuid.asString(), DBHelpers::Category::Player);
-            if (playerTag) {
-                std::string serverId = playerTag->at("ServerId");
-                if (!serverId.empty() && db->hasKey(serverId, DBHelpers::Category::Player)) {
-                    auto player_offline = gmlib::OfflinePlayer(uuid,serverId);
-                    if (auto nbtResult = player_offline.getNbt()) {
-                        return std::make_unique<CompoundTag>(nbtResult.value());
-                    }
-
-
-                }
-            }
-        }
-
-    }
-    return nullptr;
+    if (auto player = ll::service::getLevel()->getPlayer(uuid))
+        return static_cast<gmlib::GMPlayer&>(*player).getNbt();
+    auto db = ll::service::getDBStorage();
+    if (!db) return nullptr;
+    auto playerTag = db->getCompoundTag(
+        "player_" + uuid.asString(),
+        DBHelpers::Category::Player
+    );
+    if (!playerTag||!playerTag->contains("ServerId")) return nullptr;
+    auto nbt =gmlib::OfflinePlayer(uuid, playerTag->at("ServerId")).getNbt();
+    return nbt ? std::make_unique<CompoundTag>(*nbt) : nullptr;
 }
+
 void checkPlayerForm(Player& pl, mce::UUID const& uuid) {
     std::string name = getNameFormUuid(uuid);
     auto        fm   = ll::form::SimpleForm(tr("form.checkPlayer.title"), tr("form.checkPlayer.content", {name}));
     fm.appendButton(tr("form.checkPlayer.copyInventory"), [uuid, name](Player& pl) {
         saveInventory(pl);
         auto nbt =getNBTptr(uuid);
-
         auto playerNbt=getNBTptr(pl.getUuid());
         if ((!nbt)||(!playerNbt)) {
 
             return pl.sendMessage(tr("checkPlayer.copyInventory.failed", {name}));
         }
-        playerNbt->mTags["Armor"] = nbt->at("Armor");
-        playerNbt->mTags["EnderChestInventory"] = nbt->at("EnderChestInventory");
-        playerNbt->mTags["Offhand"] = nbt->at("Offhand");
-        playerNbt->mTags["Inventory"] = nbt->at("Inventory");
-
+        for (auto key : InvKey)
+            playerNbt->mTags[key] = nbt->at(key);
         bool success= validSetNbt(pl.getUuid(), std::move(playerNbt));
         pl.refreshInventory();
-        if (!success) {
-            return pl.sendMessage(tr("checkPlayer.copyInventory.failed", {name}));
-        }
-
-        return pl.sendMessage(tr("checkPlayer.copyInventory.success", {name}));
+        return  pl.sendMessage(tr(success ? "checkPlayer.copyInventory.success" :
+        "checkPlayer.copyInventory.setFailed",{name}));
 
     });
     fm.appendButton(tr("form.checkPlayer.writeInventory"), [uuid, name](Player& pl) {
@@ -334,8 +295,6 @@ void invalidInputForm(Player& pl) {
     });
 }
 
-
-
 void confirmWriteForm(Player& pl, mce::UUID const& uuid, std::string const& name) {
     auto fm = ll::form::ModalForm(
         tr("form.confirmWrite.title"),
@@ -348,21 +307,15 @@ void confirmWriteForm(Player& pl, mce::UUID const& uuid, std::string const& name
             auto& self      = static_cast<gmlib::GMPlayer&>(pl);
             auto  nbt       = self.getNbt();
             auto  targetNbt = getNBTptr(uuid);
-
             if (!targetNbt) {
                 return pl.sendMessage(tr("checkPlayer.writeInventory.failed", {name}));
             }
-            targetNbt->mTags["Armor"] = nbt->at("Armor");
-            targetNbt->mTags["EnderChestInventory"] = nbt->at("EnderChestInventory");
-            targetNbt->mTags["Offhand"] = nbt->at("Offhand");
-            targetNbt->mTags["Inventory"] = nbt->at("Inventory");
+            for (auto key : InvKey)
+                targetNbt->mTags[key] = nbt->at(key);
             bool success= validSetNbt(uuid, std::move(targetNbt));
             pl.refreshInventory();
-            if (!success) {
-                return pl.sendMessage(tr("checkPlayer.writeInventory.failed", {name}));
-            }
-
-            return pl.sendMessage(tr("checkPlayer.writeInventory.success", {name}));
+            return  pl.sendMessage(tr(success ? "checkPlayer.writeInventory.success" :
+                "checkPlayer.writeInventory.setFailed",{name}));
         }
         return checkPlayerForm(pl, uuid);
     });
@@ -380,8 +333,7 @@ void confirmDeleteForm(Player& pl, mce::UUID const& uuid, std::string const& nam
             if (auto player = ll::service::getLevel()->getPlayer(uuid)) {
                 return deleteFailedForm(pl, uuid, name);
             }
-        gmlib::OfflinePlayer::deletePlayerNbt(uuid);
-
+            gmlib::OfflinePlayer::deletePlayerNbt(uuid);
             return pl.sendMessage(tr("checkPlayer.deletePlayer.success", {name}));
         }
         return checkPlayerForm(pl, uuid);
