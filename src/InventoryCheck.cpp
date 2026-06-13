@@ -29,7 +29,7 @@ void saveInventory(Player& player) {
     auto& pl   = static_cast<gmlib::GMPlayer&>(player);
     auto  uuid = pl.getUuid();
     ll::file_utils::writeFile(
-        "./plugins/InventoryChecker/save/" + uuid.asString() + ".dat",
+        "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat",
         pl.getNbt()->toBinaryNbt(),
         true
     );
@@ -63,7 +63,7 @@ bool validSetNbt(mce::UUID uuid, const std::unique_ptr<CompoundTag>& nbt) {
 bool resumeInventory(Player& player) {
     auto&       pl   = static_cast<gmlib::GMPlayer&>(player);
     auto        uuid = pl.getUuid();
-    std::string path = "./plugins/InventoryChecker/save/" + uuid.asString() + ".dat";
+    std::string path = "./plugins/InventoryCheck/save/" + uuid.asString() + ".dat";
     if (auto binaryData = ll::file_utils::readFile(path, true)) {
         std::filesystem::remove(path);
         if (auto nbt = CompoundTag::fromBinaryNbt(binaryData.value())) {
