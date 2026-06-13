@@ -2,12 +2,14 @@
 
 #include <span>
 
-#include <include_all.h>
+#include "mc/world/actor/player/Player.h"
+
+#include <string>
+#include <vector>
 
 #define MOD_NAME     "InventoryCheck"
-#define TARGET_PROTOCOL 686
+#define TARGET_PROTOCOL 944
 
-extern ll::Logger logger;
 
 extern std::string tr(std::string const& key, std::vector<std::string> const& data = {});
 

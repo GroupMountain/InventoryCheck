@@ -1,29 +1,43 @@
 {
-    "format_version": 2,
+    "format_version": 3,
+    "format_uuid": "289f771f-2c9a-4d73-9f3f-8492495a924d",
     "tooth": "github.com/GroupMountain/InventoryCheck",
-    "version": "0.13.1",
+    "version": "0.16.0",
     "info": {
         "name": "InventoryCheck",
         "description": "Check Player's Inventory",
         "author": "GroupMountain",
         "source": "github.com/GroupMountain/InventoryCheck",
         "tags": [
-            "levilamina",
-            "inventory",
+            "platform:levilamina",
+            "type:mod",
             "checkbag",
             "gmlib"
         ]
     },
-    "asset_url": "https://github.com/GroupMountain/InventoryCheck/releases/download/v0.13.1/InventoryCheck-windows-x64.zip",
-    "dependencies": {
-        "github.com/GroupMountain/GMLIB": ">=0.13.7"
-    },
-    "files": {
-        "place": [
-            {
-                "src": "InventoryCheck/*",
-                "dest": "plugins/InventoryCheck"
-            }
-        ]
-    }
+
+    "variants": [
+        {
+            "platform": "win-x64",
+            "dependencies": {
+                "github.com/GroupMountain/GMLIB-Release": ">=26.10.0"
+            },
+            "assets": [
+                {
+                    "type": "self",
+                    "urls": [],
+                    "placements": [
+                        {
+                            "type": "dir",
+                            "src": "InventoryCheck/*",
+                            "dest": "plugins/InventoryCheck"
+                        }
+                    ]
+                }
+            ],
+            "remove_files": [
+                "plugins/InventoryCheck"
+            ]
+        }
+    ]
 }
