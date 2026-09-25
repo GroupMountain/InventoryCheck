@@ -34,15 +34,12 @@ public:
 
     Config& getConfig();
 
-    LangI18n& getI18n();
 
-    std::vector<gmlib::UserCache::UserCacheEntry> userCache;
 
 
 private:
     ll::mod::NativeMod& mSelf;
     std::optional<Config>     mConfig;
-    std::optional<LangI18n>   mI18n;
 };
 
 } // namespace InventoryCheck

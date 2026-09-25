@@ -132,9 +132,7 @@ std::unordered_map<mce::UUID, std::string> generateUuidMap() {
         for (const auto& entry : ll::service::PlayerInfo::getInstance().entries()) {
             allUuids.push_back(entry.uuid);
         }
-        for (const auto& player : ll::service::getLevel()->getPlayerList()) {
-            allUuids.push_back(player.first);
-        }
+
         std::unordered_map<mce::UUID, std::string> allList;
         for (auto& uuid : allUuids) {
             auto name     = getNameFormUuid(uuid);
@@ -261,7 +259,7 @@ void checkPlayerForm(Player& pl, mce::UUID const& uuid) {
         }
         for (auto key : InvKey)
             playerNbt->mTags[key] = nbt->at(key);
-        bool success= validSetNbt(pl.getUuid(), std::move(playerNbt));
+        bool success= validSetNbt(pl.getUuid(), playerNbt);
         pl.refreshInventory();
         return  pl.sendMessage(tr(success ? "checkPlayer.copyInventory.success" :
         "checkPlayer.copyInventory.setFailed",{name}));

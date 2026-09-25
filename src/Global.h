@@ -8,7 +8,6 @@
 #include <vector>
 
 #define MOD_NAME     "InventoryCheck"
-#define TARGET_PROTOCOL 944
 
 
 extern std::string tr(std::string const& key, std::vector<std::string> const& data = {});

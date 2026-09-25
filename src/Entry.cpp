@@ -8,6 +8,7 @@
 
 #include "gmlib/gm/i18n/LangI18n.h"
 #include "gmlib/gm/i18n/JsonI18n.h"
+#include "gmlib/mc/locale/I18nAPI.h"
 
 #include "gmlib/gm/data/UserCache.h"
 #include "ll/api/service/Bedrock.h"
@@ -25,20 +26,16 @@ bool Entry::load() {
     if (!ll::config::loadConfig(*mConfig, getSelf().getConfigDir() / u8"config.json")) {
         ll::config::saveConfig(*mConfig, getSelf().getConfigDir() / u8"config.json");
     }
-    mI18n.emplace(getSelf().getLangDir(), mConfig->language);
-    mI18n->updateOrCreateLanguage("en_US", en_US);
-    mI18n->updateOrCreateLanguage("zh_CN", zh_CN);
-    mI18n->loadAllLanguages();
 
-    if (ll::getNetworkProtocolVersion() != TARGET_PROTOCOL) {
-        getSelf().getLogger().error(tr("error.protocolMismatch.info"));
-        getSelf().getLogger().error(tr("error.protocolMismatch.version", {std::to_string(ll::getNetworkProtocolVersion()), std::to_string(TARGET_PROTOCOL)}));
-    }
+
     return true;
 }
 ;
 
 bool Entry::enable() {
+    gmlib::I18nAPI::updateOrCreateLanguageFile(getSelf().getLangDir(), "en_US", en_US);
+    gmlib::I18nAPI::updateOrCreateLanguageFile(getSelf().getLangDir(), "zh_CN", zh_CN);
+
     RegisterCommand();
 
 
@@ -54,12 +51,11 @@ bool Entry::disable() {
 
 Config& Entry::getConfig() { return mConfig.value(); }
 
-LangI18n& Entry::getI18n() { return mI18n.value(); }
 
 } // namespace InventoryCheck
 
 LL_REGISTER_MOD(InventoryCheck::Entry, InventoryCheck::Entry::getInstance());
 
 std::string tr(std::string const& key, std::vector<std::string> const& data) {
-    return InventoryCheck::Entry::getInstance().getI18n().get(key, data);
+    return gmlib::I18nAPI::get(key, data);
 }
