@@ -1,11 +1,11 @@
 add_rules("mode.debug", "mode.release")
-
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 add_repositories("groupmountain-repo https://github.com/GroupMountain/xmake-repo.git")
-add_requires("levilamina-lib 26.51.0", {configs = {target_type = "server"}})
+add_repositories("miracleforest-repo https://github.com/MiracleForest/xmake-repo.git")
+add_requires("levilamina 26.60.6", {configs = {target_type = "server"}})
 add_requires("levibuildscript")
 
-add_requires("gmlib 26.51.0")
+add_requires("gmlib 26.60.0")
 
 if not has_config("vs_runtime") then
     set_runtimes("MD")
@@ -34,7 +34,7 @@ target("InventoryCheck")
         "UNICODE",
         "_HAS_CXX23=1"
     )
-    add_packages("levilamina-lib","gmlib")
+    add_packages("levilamina","gmlib")
     set_exceptions("none") -- To avoid conflicts with /EHa.
     set_kind("shared")
     set_languages("c++23")
